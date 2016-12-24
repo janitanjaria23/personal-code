@@ -1,4 +1,5 @@
 """
+Question URL:
 http://www.geeksforgeeks.org/minimize-sum-product-two-arrays-permutations-allowed/
 """
 
