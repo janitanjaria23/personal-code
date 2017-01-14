@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+import seaborn as sns
 
 csv_file = csv.reader(open('/var/data/practice_data/titanic_train_data.csv', 'rb'))
 
