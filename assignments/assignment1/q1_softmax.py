@@ -29,10 +29,6 @@ def softmax(x):
     sum_row = x.sum(axis=chosen_axis)
     x = x / sum_row
 
-    ### YOUR CODE HERE
-    # raise NotImplementedError
-    ### END YOUR CODE
-
     return np.array(x)
 
 
@@ -68,10 +64,7 @@ def test_softmax():
     your tests be graded.
     """
     print "Running your tests..."
-    ### YOUR CODE HERE
-    # raise NotImplementedError
     pass
-    ### END YOUR CODE  
 
 
 if __name__ == "__main__":
