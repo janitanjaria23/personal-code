@@ -26,7 +26,6 @@ def check_table_presence():
 
 @app.route('/', methods=['GET', 'POST'])
 def home_screen():
-    print 'here'
     if request.method == 'POST':
         user_entered_url = request.form.get('url')
         if urlparse(user_entered_url).scheme == '':
@@ -39,7 +38,7 @@ def home_screen():
             result = cursor.execute("INSERT INTO URL_DB (URL, URLENCODED) VALUES (?, ?)",
                                     [url, encoded_string])  # long value id is returned after the insert statement
             base62_encoded_string = utils.convert_to_base62(result.lastrowid)
-        shortened_url = 'janit-awesome-' + encoded_string
+        shortened_url = 'inception-' + encoded_string
         return render_template('home.html', short_url=shortened_url)
     return render_template('home.html')
 
@@ -47,7 +46,7 @@ def home_screen():
 @app.route('/<short_url>')
 def redirecting_shortened_url(short_url):
     redirect_url = 'http://localhost:1723'
-    encoded_part = short_url.split('janit-awesome-')[1]
+    encoded_part = short_url.split('inception-')[1]
 
     with sqlite3.connect('urls.db') as conn:
         cursor = conn.cursor()
@@ -61,6 +60,5 @@ def redirecting_shortened_url(short_url):
 
 if __name__ == '__main__':
     check_table_presence()
-    print 'done checking table'
     app.run(host='0.0.0.0',
             debug=False, port=1723)
