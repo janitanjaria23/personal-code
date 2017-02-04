@@ -1,0 +1,305 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import itertools\n",
+    "\n",
+    "arr = [[1,2,3,4],\n",
+    "       [12,13,14,5],\n",
+    "       [11,16,15,6],\n",
+    "       [10,9,8,7]]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "def transpose_and_yield_top(arr):\n",
+    "    while arr:\n",
+    "        yield arr[0]\n",
+    "        print arr[0]\n",
+    "        arr = list(reversed(zip(*arr[1:])))\n",
+    "        print arr"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[1, 2, 3, 4]\n",
+      "[(5, 6, 7), (14, 15, 8), (13, 16, 9), (12, 11, 10)]\n",
+      "(5, 6, 7)\n",
+      "[(8, 9, 10), (15, 16, 11), (14, 13, 12)]\n",
+      "(8, 9, 10)\n",
+      "[(11, 12), (16, 13), (15, 14)]\n",
+      "(11, 12)\n",
+      "[(13, 14), (16, 15)]\n",
+      "(13, 14)\n",
+      "[(15,), (16,)]\n",
+      "(15,)\n",
+      "[(16,)]\n",
+      "(16,)\n",
+      "[]\n",
+      "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print list(itertools.chain(*transpose_and_yield_top(arr)))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "l = [1, 2, 3, 4, 10, 20, 30, 40, 100, 200]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "k = 4"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "def solve(l, k):\n",
+    "    l.sort()\n",
+    "    print l\n",
+    "    min_diff = float('Inf')\n",
+    "    for i in range(0, len(l)):\n",
+    "        window_list = l[i:i+k]\n",
+    "        print window_list\n",
+    "        diff = max(window_list) - min(window_list)\n",
+    "        if diff < min_diff and len(window_list) > 1:\n",
+    "            print diff\n",
+    "            min_diff = diff\n",
+    "    return min_diff"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 60,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[1, 2, 3, 4, 10, 20, 30, 40, 100, 200]"
+      ]
+     },
+     "execution_count": 60,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "l"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 61,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "4"
+      ]
+     },
+     "execution_count": 61,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "k"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 62,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[1, 2, 3, 4, 10, 20, 30, 40, 100, 200]\n",
+      "[1, 2, 3, 4]\n",
+      "3\n",
+      "[2, 3, 4, 10]\n",
+      "[3, 4, 10, 20]\n",
+      "[4, 10, 20, 30]\n",
+      "[10, 20, 30, 40]\n",
+      "[20, 30, 40, 100]\n",
+      "[30, 40, 100, 200]\n",
+      "[40, 100, 200]\n",
+      "[100, 200]\n",
+      "[200]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "3"
+      ]
+     },
+     "execution_count": 62,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "solve(l, k)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 67,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "def solve_merge(a, b):\n",
+    "    fl = []\n",
+    "    i, j = 0, 0\n",
+    "    while(i < len(a) and j < len(b)):\n",
+    "    \n",
+    "        if a[i] <= b[j]:\n",
+    "            fl.append(a[i])\n",
+    "            i += 1\n",
+    "        else:\n",
+    "            fl.append(b[j])\n",
+    "            j += 1 \n",
+    "    \n",
+    "    while(i < len(a)):\n",
+    "\n",
+    "        fl.append(a[i])\n",
+    "        i += 1\n",
+    "    \n",
+    "    while(j < len(b)):\n",
+    "\n",
+    "        fl.append(b[j])\n",
+    "        j += 1\n",
+    "    \n",
+    "    return fl"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 68,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "a = [2 ,3 , 8] \n",
+    "b = [-1 ,7 ,10]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 69,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "fl = solve_merge(a, b)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 70,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[-1, 2, 3, 7, 8, 10]"
+      ]
+     },
+     "execution_count": 70,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "fl"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
