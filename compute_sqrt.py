@@ -17,7 +17,7 @@ def find_sqrt(n):
 
 
 def main():
-    n = 100
+    n = 11
     res = find_sqrt(n)
     print res
 
