@@ -17,7 +17,7 @@ def dec_to_bin(n, base):
 
 def main():
     # n = 6
-    n = 0
+    n = 11
     base = 2  # base to convert to
     res = dec_to_bin(n, base)
     print res

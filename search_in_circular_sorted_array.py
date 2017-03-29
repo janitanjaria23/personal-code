@@ -1,11 +1,10 @@
-
 def search_elem(l, x):
     n = len(l)
     start = 0
     end = n - 1
 
     while start <= end:
-        mid = start + (end - start ) /2
+        mid = start + (end - start) / 2
 
         if l[mid] == x:
             return mid

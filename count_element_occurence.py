@@ -24,14 +24,14 @@ def count_occurence(a, b, first_search):
 
 def main():
     a = [5, 7, 7, 8, 8, 8, 10]
-    b = 70
+    b = 7
     first_index = count_occurence(a, b, True)
     if first_index == -1:
-        # print 0
+        print 0
         return 0
     else:
         last_index = count_occurence(a, b, False)
-        # print last_index - first_index + 1
+        print last_index - first_index + 1
         return last_index - first_index + 1
 
 main()
