@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import hashlib
-from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit, cross_val_score
 from pandas.tools.plotting import scatter_matrix
 from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, LabelBinarizer, StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -155,6 +155,7 @@ def use_linear_regression(housing_prepared, housing_labels):
     linear_mse = mean_squared_error(housing_labels, housing_predictions)
     linear_rmse = np.sqrt(linear_mse)
     print "Linear Regression RMSE: ", linear_rmse
+    return linear_reg
 
 
 def use_decision_tree_regressor(housing_prepared, housing_labels):
@@ -164,6 +165,16 @@ def use_decision_tree_regressor(housing_prepared, housing_labels):
     tree_mse = mean_squared_error(housing_labels, housing_predictions)
     tree_rmse = np.sqrt(tree_mse)
     print "Decision Tree RMSE: ", tree_rmse
+    return tree_reg
+
+
+def display_scores(model_name, housing_prepared, housing_labels):
+    scores = cross_val_score(model_name, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+    print scores
+    rmse_scores = np.sqrt(-scores)
+    print "Scores: ", rmse_scores
+    print "Mean Scores: ", rmse_scores.mean()
+    print "Std. Deviation Scores: ", rmse_scores.std()
 
 
 def main():
@@ -244,11 +255,13 @@ def main():
     ])
 
     housing_prepared = full_pipeline.fit_transform(housing)
-    print housing_prepared
+    # print housing_prepared
     print housing_prepared.shape
 
-    use_linear_regression(housing_prepared, housing_labels)
-    use_decision_tree_regressor(housing_prepared, housing_labels)
+    linear_reg = use_linear_regression(housing_prepared, housing_labels)
+    tree_reg = use_decision_tree_regressor(housing_prepared, housing_labels)
+    display_scores(linear_reg, housing_prepared, housing_labels)
+    display_scores(tree_reg, housing_prepared, housing_labels)
 
 
 main()
