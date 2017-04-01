@@ -6,10 +6,43 @@ import numpy as np
 import hashlib
 from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from pandas.tools.plotting import scatter_matrix
-from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, LabelBinarizer
+from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, LabelBinarizer, StandardScaler
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.pipeline import Pipeline, FeatureUnion
 
 housing_path = "datasets/housing"
 strat_train_set, strat_test_set = None, None
+
+rooms_ix, bedrooms_ix, population_ix, household_ix = 3, 4, 5, 6
+
+
+class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
+    def __init__(self, add_bedrooms_per_room=True):  # no *args or **kargs
+        self.add_bedrooms_per_room = add_bedrooms_per_room
+
+    def fit(self, X, y=None):
+        return self  # nothing else to do
+
+    def transform(self, X, y=None):
+        rooms_per_household = X[:, rooms_ix] / X[:, household_ix]
+        population_per_household = X[:, population_ix] / X[:, household_ix]
+        if self.add_bedrooms_per_room:
+            bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
+            return np.c_[X, rooms_per_household, population_per_household,
+                         bedrooms_per_room]
+        else:
+            return np.c_[X, rooms_per_household, population_per_household]
+
+
+class DataFrameSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, attribute_names):
+        self.attribute_names = attribute_names
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return X[self.attribute_names].values
 
 
 def fetch_housing_data():
@@ -107,8 +140,8 @@ def transform_data(data_frame, categorical_values_present=True):
     data_frame_tr = pd.DataFrame(X, columns=data_frame_num.columns)
     if categorical_values_present:
         data_frame_cat_onehot = convert_text_to_onehot_vectors(data_frame, attribute_name="ocean_proximity")
-        
-    return data_frame_tr
+
+    return data_frame_cat_onehot
 
 
 def main():
@@ -161,6 +194,36 @@ def main():
     housing = strat_train_set.drop("median_house_value",
                                    axis=1)  # .drop() creates a copy and does not affect the strat_train_set
     housing_labels = strat_train_set["median_house_value"].copy()
+
+    num_pipeline = Pipeline([("imputer", Imputer(strategy="median")), ("attribs_adder", CombinedAttributesAdder()),
+                             ("std_scaler", StandardScaler()), ])
+    # housing_num = remove_non_numerical_attribute(data_frame=housing, attribute_name="ocean_proximity")
+    housing_num = housing.drop("ocean_proximity", axis=1)
+    # housing_num_tr = num_pipeline.fit_transform(housing_num)
+
+    num_attribs = list(housing_num)
+    cat_attribs = ["ocean_proximity"]
+
+    num_pipeline = Pipeline([
+        ('selector', DataFrameSelector(num_attribs)),
+        ('imputer', Imputer(strategy="median")),
+        ('attribs_adder', CombinedAttributesAdder()),
+        ('std_scaler', StandardScaler()),
+    ])
+
+    cat_pipeline = Pipeline([
+        ('selector', DataFrameSelector(cat_attribs)),
+        ('label_binarizer', LabelBinarizer()),
+    ])
+
+    full_pipeline = FeatureUnion(transformer_list=[
+        ("num_pipeline", num_pipeline),
+        ("cat_pipeline", cat_pipeline),
+    ])
+
+    housing_prepared = full_pipeline.fit_transform(housing)
+    print housing_prepared
+    print housing_prepared.shape
 
 
 main()
