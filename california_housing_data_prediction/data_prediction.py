@@ -9,6 +9,10 @@ from pandas.tools.plotting import scatter_matrix
 from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, LabelBinarizer, StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.tree import DecisionTreeRegressor
+
 
 housing_path = "datasets/housing"
 strat_train_set, strat_test_set = None, None
@@ -144,6 +148,24 @@ def transform_data(data_frame, categorical_values_present=True):
     return data_frame_cat_onehot
 
 
+def use_linear_regression(housing_prepared, housing_labels):
+    linear_reg = LinearRegression()
+    linear_reg.fit(housing_prepared, housing_labels)
+    housing_predictions = linear_reg.predict(housing_prepared)
+    linear_mse = mean_squared_error(housing_labels, housing_predictions)
+    linear_rmse = np.sqrt(linear_mse)
+    print "Linear Regression RMSE: ", linear_rmse
+
+
+def use_decision_tree_regressor(housing_prepared, housing_labels):
+    tree_reg = DecisionTreeRegressor()
+    tree_reg.fit(housing_prepared, housing_labels)
+    housing_predictions = tree_reg.predict(housing_prepared)
+    tree_mse = mean_squared_error(housing_labels, housing_predictions)
+    tree_rmse = np.sqrt(tree_mse)
+    print "Decision Tree RMSE: ", tree_rmse
+
+
 def main():
     global strat_train_set, strat_test_set
     test_ratio = 0.2
@@ -224,6 +246,9 @@ def main():
     housing_prepared = full_pipeline.fit_transform(housing)
     print housing_prepared
     print housing_prepared.shape
+
+    use_linear_regression(housing_prepared, housing_labels)
+    use_decision_tree_regressor(housing_prepared, housing_labels)
 
 
 main()
