@@ -12,6 +12,7 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
 
 
 housing_path = "datasets/housing"
@@ -168,6 +169,16 @@ def use_decision_tree_regressor(housing_prepared, housing_labels):
     return tree_reg
 
 
+def use_random_forest_regressor(housing_prepared, housing_labels):
+    rf_reg = RandomForestRegressor()
+    rf_reg.fit(housing_prepared, housing_labels)
+    housing_predictions = rf_reg.predict(housing_prepared)
+    rf_reg_mse = mean_squared_error(housing_labels, housing_predictions)
+    rf_reg_rmse = np.sqrt(rf_reg_mse)
+    print "Random Forest RMSE: ", rf_reg_rmse
+    return rf_reg
+
+
 def display_scores(model_name, housing_prepared, housing_labels):
     scores = cross_val_score(model_name, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
     print scores
@@ -260,8 +271,10 @@ def main():
 
     linear_reg = use_linear_regression(housing_prepared, housing_labels)
     tree_reg = use_decision_tree_regressor(housing_prepared, housing_labels)
+    random_forest_reg = use_random_forest_regressor(housing_prepared, housing_labels)
     display_scores(linear_reg, housing_prepared, housing_labels)
     display_scores(tree_reg, housing_prepared, housing_labels)
+    display_scores(random_forest_reg, housing_prepared, housing_labels)
 
 
 main()
