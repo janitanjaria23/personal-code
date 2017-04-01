@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import hashlib
 from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
+from pandas.tools.plotting import scatter_matrix
 
 housing_path = "datasets/housing"
 
@@ -49,6 +50,10 @@ def create_scatter_plots(data_frame):
     plt.legend()
     plt.savefig("housing_scatter_plot_with_population.png")
 
+    attributes = ["median_house_value", "median_income", "total_rooms",
+                  "housing_median_age"]
+    scatter_matrix(data_frame[attributes], figsize=(12, 8))
+
 
 def explore_nature_of_df(data_frame):
     print data_frame.head()
@@ -65,6 +70,12 @@ def split_train_test_by_id(data, test_ratio, id_column, hash=hashlib.md5):
     ids = data[id_column]
     in_test_set = ids.apply(lambda id_: test_set_check(id_, test_ratio, hash))
     return data.loc[~in_test_set], data.loc[in_test_set]
+
+
+def get_correlation_info(data_frame):
+    correlation_matrix = data_frame.corr()
+    correlation_matrix['median_house_values'].sort_values(ascending=False)
+    print correlation_matrix
 
 
 def main():
@@ -106,7 +117,8 @@ def main():
     housing = strat_train_set.copy()
     # Scatterplot: https://www.wikiwand.com/en/Scatter_plot
     create_scatter_plots(data_frame=housing)
-    
+    housing.plot(kind="scatter", x="median_income", y="median_house_value", alpha=0.1)
+    plt.savefig("housing_correlation_with_income_plot.png")
 
 
 main()
