@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import hashlib
-from sklearn.model_selection import train_test_split, StratifiedShuffleSplit, cross_val_score
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit, cross_val_score, GridSearchCV
 from pandas.tools.plotting import scatter_matrix
 from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, LabelBinarizer, StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -276,5 +276,20 @@ def main():
     display_scores(tree_reg, housing_prepared, housing_labels)
     display_scores(random_forest_reg, housing_prepared, housing_labels)
 
+    param_grid = [
+        {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
+        {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
+    ]
+
+    forest_reg = RandomForestRegressor()
+
+    grid_search = GridSearchCV(forest_reg, param_grid=param_grid, scoring="neg_mean_squared_error", cv=5)
+
+    grid_search.fit(housing_prepared, housing_labels)
+    print "Best set of params: ", grid_search.best_params_
+    print "Best estimator: ", grid_search.best_estimator_
+    print "Evaluation scores are available in: ", grid_search.cv_results_
+    feature_importance = grid_search.best_estimator_.feature_importances_
+    print "Feature Importance: ", feature_importance
 
 main()
