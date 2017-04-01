@@ -84,13 +84,22 @@ def main():
         strat_train_set = housing.loc[train_index]
         strat_test_set = housing.loc[test_index]
 
-    print housing['income_cat'].value_counts() / len(housing)
+    # print housing['income_cat'].value_counts() / len(housing)
 
     for data_set in (strat_train_set, strat_test_set):
         data_set.drop(['income_cat'], axis=1, inplace=True)
 
     housing = strat_train_set.copy()
-
+    # Scatterplot: https://www.wikiwand.com/en/Scatter_plot
     housing.plot(kind="scatter", x="longitude", y="latitude")
+    plt.savefig("housing_scatter_plot.png")
+    housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.1)  # to show better distribution
+    plt.savefig("housing_scatter_plot_with_alpha.png")
+
+    housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.4, s=housing['population'], label='population',
+                 c='median_house_value',
+                 cmap=plt.get_cmap("jet"), colorbar=True)
+    plt.legend()
+    plt.savefig("housing_scatter_plot_with_population.png")
 
 main()
