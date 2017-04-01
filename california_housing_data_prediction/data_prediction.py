@@ -6,8 +6,10 @@ import numpy as np
 import hashlib
 from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from pandas.tools.plotting import scatter_matrix
+from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, LabelBinarizer
 
 housing_path = "datasets/housing"
+strat_train_set, strat_test_set = None, None
 
 
 def fetch_housing_data():
@@ -74,8 +76,39 @@ def split_train_test_by_id(data, test_ratio, id_column, hash=hashlib.md5):
 
 def get_correlation_info(data_frame):
     correlation_matrix = data_frame.corr()
-    correlation_matrix['median_house_values'].sort_values(ascending=False)
+    correlation_matrix['median_house_value'].sort_values(ascending=False)
     print correlation_matrix
+
+
+def remove_non_numerical_attribute(data_frame, attribute_name):
+    data_frame_num = data_frame.drop(attribute_name, axis=1)
+    return data_frame_num
+
+
+def convert_text_to_onehot_vectors(data_frame, attribute_name):
+    data_frame_cat = data_frame[attribute_name]
+    # encoder = LabelEncoder()
+    # housing_cat_encoded = encoder.fit_transform(housing_cat)
+    # print "Encoder Classes: ", encoder.classes_
+    # encoder = OneHotEncoder()
+    # housing_cat_onehot = encoder.fit_transform(housing_cat_encoded.reshape(-1, 1))
+    encoder = LabelBinarizer()
+    data_frame_cat_onehot = encoder.fit_transform(data_frame_cat)
+    return data_frame_cat_onehot
+
+
+def transform_data(data_frame, categorical_values_present=True):
+    imputer = Imputer(strategy="median")
+    data_frame_num = remove_non_numerical_attribute(data_frame=data_frame, attribute_name="ocean_proximity")
+    imputer.fit(data_frame_num)
+    print "Imputer Stats:", imputer.statistics_
+    X = imputer.transform(data_frame_num)  # X is a plan numpy array containing transformed features
+    # sometimes fit_transform() is optimized and runs much faster as compared to fit() + transform()
+    data_frame_tr = pd.DataFrame(X, columns=data_frame_num.columns)
+    if categorical_values_present:
+        data_frame_cat_onehot = convert_text_to_onehot_vectors(data_frame, attribute_name="ocean_proximity")
+        
+    return data_frame_tr
 
 
 def main():
@@ -119,6 +152,15 @@ def main():
     create_scatter_plots(data_frame=housing)
     housing.plot(kind="scatter", x="median_income", y="median_house_value", alpha=0.1)
     plt.savefig("housing_correlation_with_income_plot.png")
+
+    housing["rooms_per_household"] = housing["total_rooms"] / housing["households"]
+    housing["bedrooms_per_room"] = housing["total_bedrooms"] / housing["total_rooms"]
+    housing["population_per_household"] = housing["population"] / housing["households"]
+    get_correlation_info(housing)
+
+    housing = strat_train_set.drop("median_house_value",
+                                   axis=1)  # .drop() creates a copy and does not affect the strat_train_set
+    housing_labels = strat_train_set["median_house_value"].copy()
 
 
 main()
