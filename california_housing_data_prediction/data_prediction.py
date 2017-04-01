@@ -188,6 +188,21 @@ def display_scores(model_name, housing_prepared, housing_labels):
     print "Std. Deviation Scores: ", rmse_scores.std()
 
 
+def evaluate_test_data_set(grid_search, strat_test_set, full_pipeline):
+    final_model = grid_search.best_estimator_
+
+    X_test = strat_test_set.drop("median_house_value", axis=1)
+    y_test = strat_test_set["median_house_value"].copy()
+
+    X_test_prepared = full_pipeline.transform(X_test)
+
+    final_predictions = final_model.predict(X_test_prepared)
+
+    final_mse = mean_squared_error(y_test, final_predictions)
+    final_rmse = np.sqrt(final_mse)
+    return final_rmse
+
+
 def main():
     global strat_train_set, strat_test_set
     test_ratio = 0.2
@@ -291,5 +306,9 @@ def main():
     print "Evaluation scores are available in: ", grid_search.cv_results_
     feature_importance = grid_search.best_estimator_.feature_importances_
     print "Feature Importance: ", feature_importance
+
+    final_rmse = evaluate_test_data_set(grid_search, strat_test_set, full_pipeline)
+    print "RMSE on test data set: ", final_rmse
+
 
 main()
