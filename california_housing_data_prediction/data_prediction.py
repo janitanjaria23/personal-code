@@ -33,7 +33,21 @@ def split_train_test_data(data, test_ratio):
 
 def create_histogram(data_frame):
     data_frame.hist(bins=50, figsize=(10, 15))  # can be done for individual attributes as well
-    plt.show()
+    plt.savefig("housing_data_histogram.png")
+
+
+def create_scatter_plots(data_frame):
+    data_frame.plot(kind="scatter", x="longitude", y="latitude")
+    plt.savefig("housing_scatter_plot.png")
+    data_frame.plot(kind="scatter", x="longitude", y="latitude", alpha=0.1)  # to show better distribution
+    plt.savefig("housing_scatter_plot_with_alpha.png")
+
+    data_frame.plot(kind="scatter", x="longitude", y="latitude", alpha=0.4, s=data_frame['population'],
+                    label='population',
+                    c='median_house_value',
+                    cmap=plt.get_cmap("jet"), colorbar=True)
+    plt.legend()
+    plt.savefig("housing_scatter_plot_with_population.png")
 
 
 def explore_nature_of_df(data_frame):
@@ -59,7 +73,7 @@ def main():
     # fetch_housing_data()
     housing = load_housing_data()
     # explore_nature_of_df(data_frame=housing)
-    # create_histogram(data_frame=housing)
+    create_histogram(data_frame=housing)
     # train_set, test_set = split_train_test_data(data=housing,
     #                                             test_ratio=test_ratio)  # this can have the same set of data used multiple times as a test set - which will lead to false results
     # print "Size of training data: %d" % (len(train_set))
@@ -91,15 +105,8 @@ def main():
 
     housing = strat_train_set.copy()
     # Scatterplot: https://www.wikiwand.com/en/Scatter_plot
-    housing.plot(kind="scatter", x="longitude", y="latitude")
-    plt.savefig("housing_scatter_plot.png")
-    housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.1)  # to show better distribution
-    plt.savefig("housing_scatter_plot_with_alpha.png")
+    create_scatter_plots(data_frame=housing)
+    
 
-    housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.4, s=housing['population'], label='population',
-                 c='median_house_value',
-                 cmap=plt.get_cmap("jet"), colorbar=True)
-    plt.legend()
-    plt.savefig("housing_scatter_plot_with_population.png")
 
 main()
