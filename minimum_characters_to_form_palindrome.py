@@ -1,3 +1,13 @@
+"""
+Based on the KMP Algorithm:
+http://www.geeksforgeeks.org/searching-for-patterns-set-2-kmp-algorithm/
+http://www.geeksforgeeks.org/minimum-characters-added-front-make-string-palindrome/
+https://www.wikiwand.com/en/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
+https://www.youtube.com/watch?v=GTJr8OvyEVQ
+https://www.youtube.com/watch?v=KG44VoDtsAA
+"""
+
+
 def minimum(a, b):
     if a < b:
         return a
@@ -53,8 +63,8 @@ def get_min_characters_to_be_added(input_str):
 
 def main():
     # input_str = "geeks"
-    input_str = "AACECAAAA"
-    input_str = "hqghumeaylnlfdxfi"
+    # input_str = "AACECAAAA"
+    # input_str = "hqghumeaylnlfdxfi"
     input_str = "banana"
 
     # res = min_characters(input_str, 0, len(input_str) - 1)
