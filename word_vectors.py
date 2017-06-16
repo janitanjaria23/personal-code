@@ -17,6 +17,7 @@ https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 '''
 
 '''
+- Training Data: 18 Million
 - grouping vectors in terms of clusters is called vector quantization. We can perform clustering using KMeans clustering.
 - using more clusters with less density helps greatly to produce better results.
 - Having a large "k" in kMeans clustering is very slow and hence we have decided to use it as a small value.
