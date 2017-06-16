@@ -4,7 +4,29 @@ import re
 from nltk.corpus import stopwords
 import nltk.data
 import logging
-from gensim.models import word2vec
+from gensim.models import word2vec, Word2Vec
+from sklearn.cluster import KMeans
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+
+
+'''
+Important discussions and references:
+https://groups.google.com/forum/embed/#!topic/gensim/hlYgjqEVocw
+https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+'''
+
+'''
+- grouping vectors in terms of clusters is called vector quantization. We can perform clustering using KMeans clustering.
+- using more clusters with less density helps greatly to produce better results.
+- Having a large "k" in kMeans clustering is very slow and hence we have decided to use it as a small value.
+- word2vec actually creates word clusters. And our goal is to find the center of such word clusters.
+- Conveniently, Word2Vec provides functions to load any pre-trained model that is output by Google's original C tool,
+ so it's also possible to train a model in C and then import it into Python.
+- Hierarchial softmax reduces the complexity from O(V) to O(logV). Hence it is also faster.
+- The speed up in Hierarchial softmax comes during training. During training you only need to calculate the probability of one word
+(Assuming CBOW model). You don't need to probability of every single word in your vocabulary.
+'''
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -48,6 +70,29 @@ def train_model(sentences):
     model.save(model_name)
 
 
+def cluster_words(word_vectors, model, num_clusters):
+    logging.info("Clustering starting..")
+    kmeans_clustering = KMeans(n_clusters=num_clusters)
+    idx = kmeans_clustering.fit_predict(word_vectors)  # idx stores the cluster assignment for each word
+
+    word_centroid_map = dict(zip(model.wv.index2word, idx))  # index2word is basically a list of words which are a part
+    # of the vocabulary
+    logging.info("word centroid map created..")
+    return word_centroid_map
+
+
+def create_bag_of_centroids(word_list, word_centroid_map):
+    num_centroids = max(word_centroid_map.values()) + 1
+    bag_of_centroids = np.zeros(num_centroids, dtype="float32")
+
+    for word in word_list:
+        if word in word_centroid_map:
+            idx = word_centroid_map[word]
+            bag_of_centroids[idx] += 1
+
+    return bag_of_centroids
+
+
 def main():
     sentences = []
     train = pd.read_csv("labeledTrainData.tsv", header=0,
@@ -66,10 +111,44 @@ def main():
 
     # train_model(sentences)
 
-    model = word2vec.Word2Vec.load("300features_40minwords_10context")
+    model = Word2Vec.load("300features_40minwords_10context")
     print model.doesnt_match("man woman child kitchen".split())
     print model.most_similar("man")
     print model.most_similar("queen")
     print model.most_similar("awful")
+
+    print type(model.wv.syn0)
+    print model.wv.syn0
+
+    word_vectors = model.wv.syn0
+    num_clusters = word_vectors.shape[0] / 5
+    word_centroid_map = cluster_words(word_vectors, model, num_clusters=num_clusters)
+
+    clean_train_reviews, clean_test_reviews = [], []
+    for review in train["review"]:
+        clean_train_reviews.append(review_to_wordlist(review, remove_stopwords=True))
+
+    for review in test["review"]:
+        clean_test_reviews.append(review_to_wordlist(review, remove_stopwords=True))
+
+    train_centroids = np.zeros((train["review"].size, num_clusters), dtype="float32")
+    test_centroids = np.zeros((test["review"].size, num_clusters), dtype="float32")
+
+    counter = 0
+
+    for review in clean_train_reviews:
+        train_centroids[counter] = create_bag_of_centroids(review, word_centroid_map)
+        counter += 1
+
+    counter = 0
+    for review in clean_test_reviews:
+        test_centroids[counter] = create_bag_of_centroids(review, word_centroid_map)
+        counter += 1
+
+    forest = RandomForestClassifier(n_estimators=100)
+    forest = forest.fit(train_centroids, train["sentiment"])
+    result = forest.predict(test_centroids)
+    output = pd.DataFrame(data={"id": test["id"], "sentiment": result})
+    output.to_csv("bag_of_centroids.csv", index=False, quoting=3)
 
 main()
